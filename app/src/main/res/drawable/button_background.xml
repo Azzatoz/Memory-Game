@@ -1,0 +1,12 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#80000000" /> <!-- Цвет затемнения при нажатии -->
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#00000000" /> <!-- Прозрачный цвет для нормального состояния -->
+        </shape>
+    </item>
+</selector>

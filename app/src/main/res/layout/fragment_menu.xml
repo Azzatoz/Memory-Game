@@ -1,0 +1,81 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragmentContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@drawable/gradient_lightblue">
+
+    <ImageView
+        android:id="@+id/gameLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="250dp"
+        android:src="@drawable/logo_new"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:contentDescription="@string/gamelogo" />
+
+    <RelativeLayout
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:id="@+id/coinCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/count_of_coins"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:layout_centerVertical="true"/>
+
+        <ImageView
+            android:id="@+id/coinIcon"
+            android:layout_width="50dp"
+            android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="4dp"
+            android:layout_toEndOf="@id/coinCount"
+            android:contentDescription="@string/coins"
+            android:src="@drawable/coin_icon"
+            tools:ignore="ImageContrastCheck" />
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/startGameButton"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="@string/Play"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_below="@id/gameLogo"
+        android:layout_marginTop="50dp" />
+
+
+    <ImageButton
+        android:id="@+id/settingsButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/settings"
+        android:background="?android:attr/selectableItemBackground"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/Settings" />
+
+    <ImageButton
+        android:id="@+id/privacyPolicyButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/privatepolicy_icon"
+        android:background="?android:attr/selectableItemBackground"
+        android:layout_toEndOf="@id/settingsButton"
+        android:layout_alignBottom="@id/settingsButton"
+        android:layout_marginStart="16dp"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/Privacy_policy" />
+</RelativeLayout>
