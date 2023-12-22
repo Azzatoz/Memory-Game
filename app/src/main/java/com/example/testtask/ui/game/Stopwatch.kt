@@ -1,11 +1,11 @@
-package com.example.testtask.ui.support_files
+package com.example.testtask.ui.game
 
 import android.os.SystemClock
 
 class Stopwatch {
 
     private var startTime: Long = 0L
-    var isRunning: Boolean = false
+    private var isRunning: Boolean = false
 
     fun start() {
         if (!isRunning) {

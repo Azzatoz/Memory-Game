@@ -1,6 +1,8 @@
 package com.example.testtask.ui.game
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.widget.Chronometer
 import androidx.appcompat.app.AppCompatActivity
@@ -9,16 +11,15 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.testtask.R
 import com.example.testtask.ui.main.MenuViewModel
-import com.example.testtask.ui.support_files.GridAdapter
-import com.example.testtask.ui.support_files.GridItem
-import com.example.testtask.ui.support_files.Stopwatch
 
-class GameScene : AppCompatActivity() {
+class GameScene : AppCompatActivity(), GridAdapter.OnCardClickListener, Game.OnGameUpdateListener {
 
     private lateinit var viewModel: MenuViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: GridAdapter
+    private lateinit var game: Game
     private lateinit var stopwatch: Stopwatch
+    private lateinit var chronometer: Chronometer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,17 +28,13 @@ class GameScene : AppCompatActivity() {
         viewModel = ViewModelProvider(this)[MenuViewModel::class.java]
 
         recyclerView = findViewById(R.id.gameRecyclerView)
-        val chronometer: Chronometer = findViewById(R.id.chronometer)
+        chronometer = findViewById(R.id.chronometer)
 
         stopwatch = Stopwatch()
+        game = Game(this)
 
-        val gridItems = createGridItems().shuffled()
-        adapter = GridAdapter(this, gridItems) { clickedItem ->
-            // Обработка нажатия на элемент
-            clickedItem.flip()  // Перевернуть карту
-            adapter.notifyDataSetChanged()  // Уведомить адаптер о изменении данных
-            updateChronometer(chronometer)  // Обновить секундомер
-        }
+        val gridItems = game.images.shuffled().mapIndexed { index, resId -> GridItem(index, resId) }
+        adapter = GridAdapter(this, gridItems, this)
 
         recyclerView.layoutManager = GridLayoutManager(this, 5)
         recyclerView.adapter = adapter
@@ -45,54 +42,38 @@ class GameScene : AppCompatActivity() {
 
         // Запускаем секундомер при создании активности
         stopwatch.start()
-    }
 
-    private fun createGridItems(): List<GridItem> {
-        val itemList = mutableListOf<GridItem>()
-
-        val imageResIds = listOf(
-            R.mipmap.image1, R.mipmap.image2, R.mipmap.image3,
-            R.mipmap.image4, R.mipmap.image5, R.mipmap.image6,
-            R.mipmap.image7, R.mipmap.image8, R.mipmap.image9,
-            R.mipmap.image10
-        )
-
-        for (i in 1..2) {
-            for (imageResId in imageResIds) {
-                val item = GridItem(i, imageResId)
-                itemList.add(item)
-            }
-        }
-        return itemList.shuffled()
-    }
-    private fun updateChronometer(chronometer: Chronometer) {
-        chronometer.base = SystemClock.elapsedRealtime() - stopwatch.elapsedTime()
+        // Инициализируем хронометр
+        chronometer.base = SystemClock.elapsedRealtime()
         chronometer.start()
+    }
+    override fun onCardClicked(position: Int) {
+        val isFlipped = game.isCardFlipped(position)
 
-        // Проверяем, завершилась ли игра
-        if (stopwatch.isRunning && stopwatch.elapsedTime() >= 20000) {
-            stopwatch.stop()  // Останавливаем секундомер
+        // Если карта не перевернута, покажем ее изображение на короткое время, затем перевернем обратно
+        if (!isFlipped) {
+            // Переворачиваем карту
+            game.flipCard(position)
+            adapter.notifyItemChanged(position)
 
-            // Вычисляем награду
-            val reward = calculateReward(stopwatch.elapsedTime())
-            // Добавляем награду к общему количеству монет
-            viewModel.addCoins(reward)
-
-            // Выводим сообщение с результатами
-            //Toast.makeText(this, "Вы получили $reward монет", Toast.LENGTH_SHORT).show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                // Переворачиваем обратно через 1000 миллисекунд
+                game.flipCard(position)
+                adapter.notifyItemChanged(position)
+            }, 1000)
         }
     }
+    override fun onCardsFlipped(card1: Int, card2: Int, isMatch: Boolean) {
+        adapter.notifyItemChanged(card1)
+        adapter.notifyItemChanged(card2)
+    }
 
-    private fun calculateReward(elapsedTime: Long): Int {
-        val baseReward = 100
-        val minReward = 10
-        val timeThreshold = 20000 // Порог времени в миллисекундах
-        val penaltyRate = 5
+    override fun onGameFinished(moves: Int, elapsedTime: Long, reward: Int) {
+        chronometer.stop()
+        //Toast.makeText(this, "Игра завершена. Вы получили $reward монет", Toast.LENGTH_SHORT).show()
+    }
 
-        // Вычисляем штраф за каждую последующую секунду сверх порога
-        val penalty = maxOf(0, ((elapsedTime - timeThreshold) / 1000) * penaltyRate).toInt()
-
-        // Вычисляем итоговую награду
-        return maxOf(minReward, baseReward - penalty)
+    override fun isCardFlipped(cardId: Int): Boolean {
+        return game.isCardFlipped(cardId)
     }
 }
