@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.util.Log
 import android.widget.Chronometer
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -34,7 +35,7 @@ class GameScene : AppCompatActivity(), GridAdapter.OnCardClickListener, Game.OnG
         game = Game(this)
 
         // Используем shuffledImages из Game вместо создания нового списка
-        adapter = GridAdapter(this, game.shuffledImages, this)
+        adapter = GridAdapter(this, game.shuffledCards, this)
 
         recyclerView.layoutManager = GridLayoutManager(this, 5)
         recyclerView.adapter = adapter
@@ -44,9 +45,9 @@ class GameScene : AppCompatActivity(), GridAdapter.OnCardClickListener, Game.OnG
 
         chronometer.base = SystemClock.elapsedRealtime()
         chronometer.start()
-    }
 
-    // Реализация методов интерфейса OnGameUpdateListener
+
+    }
     override fun onCardsFlipped(card1: Int, card2: Int, isMatch: Boolean) {
         adapter.notifyItemChanged(card1)
         adapter.notifyItemChanged(card2)
@@ -60,21 +61,43 @@ class GameScene : AppCompatActivity(), GridAdapter.OnCardClickListener, Game.OnG
     override fun isCardFlipped(cardId: Int): Boolean {
         return game.isCardFlipped(cardId)
     }
+    override fun onCardClicked(cardId: Int) {
+        Log.d("game", "onCardClicked: cardId=$cardId, isComparing=${game.isComparing}")
 
-    override fun onCardClicked(position: Int) {
-        val isFlipped = game.isCardFlipped(position)
+        // Проверяем, идет ли в данный момент сравнение карт
+        if (!game.isComparing) {
+            Log.d("game", "onCardClicked: Not comparing")
 
-        // Если карта не перевернута, покажем ее изображение на короткое время, затем перевернем обратно
-        if (!isFlipped) {
-            // Переворачиваем карту
-            game.flipCard(position)
-            adapter.notifyItemChanged(position)
+            // Если карта не перевернута
+            if (!game.isCardFlipped(cardId)) {
+                // Переворачиваем карту
+                game.flipCard(cardId)
+                adapter.notifyItemChanged(cardId)
+                // Если это вторая карта, и она не совпадает с первой
+                if (game.secondCardId != null && game.firstCardId != cardId) {
+                    Log.d("game", "onCardClicked: Second card and not the same")
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        // Выполняем проверку совпадения
+                        val isMatch = game.comparison()
+                        Log.d("game", "onCardClicked: Checking match: isMatch=$isMatch")
 
-            Handler(Looper.getMainLooper()).postDelayed({
-                // Переворачиваем обратно через 1000 миллисекунд
-                game.flipCard(position)
-                adapter.notifyItemChanged(position)
-            }, 1000)
+                        // Если совпадение есть, уведомляем адаптер
+                        if (isMatch) {
+                            adapter.notifyItemChanged(cardId)
+                            adapter.notifyItemChanged(game.secondCardId!!)
+                            Log.d("game", "onCardClicked: Matching cards")
+                        } else {
+                            // Если нет совпадения, переворачиваем обратно
+                            game.flipCard(cardId)
+                            adapter.notifyItemChanged(cardId)
+                            game.flipCard(game.secondCardId!!)
+                            adapter.notifyItemChanged(game.secondCardId!!)
+                            Log.d("game", "onCardClicked: Not matching, flipping back")
+                        }
+                        Log.d("game", "onCardClicked: Comparison ended")
+                    }, 1000) // Задержка в 1000 миллисекунд (1 секунда)
+                }
+            }
         }
     }
 }
