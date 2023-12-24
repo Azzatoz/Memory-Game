@@ -33,20 +33,34 @@ class GameScene : AppCompatActivity(), GridAdapter.OnCardClickListener, Game.OnG
         stopwatch = Stopwatch()
         game = Game(this)
 
-        val gridItems = game.images.shuffled().mapIndexed { index, resId -> GridItem(index, resId) }
-        adapter = GridAdapter(this, gridItems, this)
+        // Используем shuffledImages из Game вместо создания нового списка
+        adapter = GridAdapter(this, game.shuffledImages, this)
 
         recyclerView.layoutManager = GridLayoutManager(this, 5)
         recyclerView.adapter = adapter
         adapter.notifyDataSetChanged()
 
-        // Запускаем секундомер при создании активности
         stopwatch.start()
 
-        // Инициализируем хронометр
         chronometer.base = SystemClock.elapsedRealtime()
         chronometer.start()
     }
+
+    // Реализация методов интерфейса OnGameUpdateListener
+    override fun onCardsFlipped(card1: Int, card2: Int, isMatch: Boolean) {
+        adapter.notifyItemChanged(card1)
+        adapter.notifyItemChanged(card2)
+    }
+
+    override fun onGameFinished(moves: Int, elapsedTime: Long, reward: Int) {
+        chronometer.stop()
+        //Toast.makeText(this, "Игра завершена. Вы получили $reward монет", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun isCardFlipped(cardId: Int): Boolean {
+        return game.isCardFlipped(cardId)
+    }
+
     override fun onCardClicked(position: Int) {
         val isFlipped = game.isCardFlipped(position)
 
@@ -62,18 +76,5 @@ class GameScene : AppCompatActivity(), GridAdapter.OnCardClickListener, Game.OnG
                 adapter.notifyItemChanged(position)
             }, 1000)
         }
-    }
-    override fun onCardsFlipped(card1: Int, card2: Int, isMatch: Boolean) {
-        adapter.notifyItemChanged(card1)
-        adapter.notifyItemChanged(card2)
-    }
-
-    override fun onGameFinished(moves: Int, elapsedTime: Long, reward: Int) {
-        chronometer.stop()
-        //Toast.makeText(this, "Игра завершена. Вы получили $reward монет", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun isCardFlipped(cardId: Int): Boolean {
-        return game.isCardFlipped(cardId)
     }
 }

@@ -1,6 +1,7 @@
 package com.example.testtask.ui.game
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +11,7 @@ import com.example.testtask.R
 
 class GridAdapter(
     private val context: Context,
-    private val items: List<GridItem>,
+    private val items: List<Card>,
     private val onCardClickListener: OnCardClickListener
 ) : RecyclerView.Adapter<GridAdapter.ViewHolder>() {
 
@@ -31,7 +32,7 @@ class GridAdapter(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val cardButton: ImageButton = itemView.findViewById(R.id.cardButton)
 
-        fun bind(item: GridItem, onCardClickListener: OnCardClickListener) {
+        fun bind(item: Card, onCardClickListener: OnCardClickListener) {
             // Обработчик нажатия
             cardButton.setOnClickListener {
                 // Вызываем обработчик клика с ID карты
@@ -39,19 +40,20 @@ class GridAdapter(
             }
 
             // Устанавливаем изображение карты
+            Log.d("before", "updateCardImage")
             updateCardImage(item.isFlipped)
+            Log.d("after", "${item.isFlipped}")
         }
 
         private fun updateCardImage(isFlipped: Boolean) {
             if (isFlipped) {
                 cardButton.setImageResource(items[bindingAdapterPosition].imageResId)
+                Log.d("TAG1", "updateCardImage: needed_card")
             } else {
                 cardButton.setBackgroundResource(R.drawable.card_back)
             }
         }
     }
-
-
     interface OnCardClickListener {
         fun onCardClicked(cardId: Int)
     }

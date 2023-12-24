@@ -1,6 +1,7 @@
 package com.example.testtask.ui.game
 
 import android.os.SystemClock
+import android.util.Log
 import com.example.testtask.R
 
 class Game(private val onGameUpdateListener: OnGameUpdateListener) {
@@ -12,7 +13,7 @@ class Game(private val onGameUpdateListener: OnGameUpdateListener) {
         R.mipmap.image10
     )
 
-    private val shuffledImages: List<GridItem> = images.mapIndexed { index, resId -> GridItem(index, resId) }.shuffled()
+    val shuffledImages: List<Card> = images.mapIndexed { index, resId -> Card(index, resId) }.shuffled()
 
     private var firstCardId: Int? = null
     private var secondCardId: Int? = null
@@ -20,12 +21,13 @@ class Game(private val onGameUpdateListener: OnGameUpdateListener) {
     private var startTime: Long = 0
     private var isGameStarted = false
 
-
     fun flipCard(cardId: Int) {
         val card = shuffledImages[cardId]
         card.flip()
         onGameUpdateListener.onCardsFlipped(cardId, -1, false) // Обновляем только одну карту
+        Log.d("Game", "flipCard: cardId=$cardId, isFlipped=${card.isFlipped}")
     }
+
 
     fun isCardFlipped(cardId: Int): Boolean {
         if (!isGameStarted) {
@@ -37,7 +39,7 @@ class Game(private val onGameUpdateListener: OnGameUpdateListener) {
             return false // Возвращаем false, так как карта еще не перевернута
         } else if (secondCardId == null && firstCardId != cardId) {
             secondCardId = cardId
-            moves++
+            //moves++
 
             // Проверяем, совпали ли карты
             val isMatch = checkMatch()
@@ -95,7 +97,9 @@ class Game(private val onGameUpdateListener: OnGameUpdateListener) {
 
 
     interface OnGameUpdateListener {
-        fun onCardsFlipped(card1: Int, card2: Int, isMatch: Boolean)
+        fun onCardsFlipped(card1: Int, card2: Int, isMatch: Boolean) {
+            Log.d("Game", "onCardsFlipped: card1=$card1, card2=$card2, isMatch=$isMatch")
+        }
         fun onGameFinished(moves: Int, elapsedTime: Long, reward: Int)
         fun isCardFlipped(cardId: Int): Boolean
     }
