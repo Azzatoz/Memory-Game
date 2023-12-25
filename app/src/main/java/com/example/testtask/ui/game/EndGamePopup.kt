@@ -1,23 +1,83 @@
 package com.example.testtask.ui.game
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
+import androidx.fragment.app.DialogFragment
 import com.example.testtask.R
+import com.example.testtask.ui.MainActivity
 
-class EndGamePopup : Fragment() {
+class EndGamePopup : DialogFragment() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private var coinsEarned: Int = 0
+
+    companion object {
+        const val TAG = "EndGamePopup"
+        private const val COINS_EARNED_KEY = "coinsEarned"
+
+        fun newInstance(coinsEarned: Int): EndGamePopup {
+            val fragment = EndGamePopup()
+            val args = Bundle()
+            args.putInt(COINS_EARNED_KEY, coinsEarned)
+            fragment.arguments = args
+            return fragment
+        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_end_game_popup, container, false)
+        val view = inflater.inflate(R.layout.fragment_end_game_popup, container, false)
+
+        // Получение ссылок на элементы интерфейса
+        val congratulationsTextView: TextView = view.findViewById(R.id.congratulationsText)
+        val rewardTextView: TextView = view.findViewById(R.id.rewardText)
+        val doubleRewardButton: Button = view.findViewById(R.id.doubleRewardButton)
+        val homeButton: Button = view.findViewById(R.id.homeButton)
+
+        // Получение данных из аргументов
+        coinsEarned = requireArguments().getInt(COINS_EARNED_KEY, 0)
+
+        // Обновление UI
+        updateUI("Congratulations! Your reward is doubled!", coinsEarned)
+        var doubleRewardButtonClicked = false
+        doubleRewardButton.setOnClickListener {
+            if (!doubleRewardButtonClicked) {
+                // Удвоение награды и обновление UI
+                coinsEarned *= 2
+                updateUI("Congratulations! Your reward is doubled!", coinsEarned)
+
+                // Помечаем кнопку как уже нажатую
+                doubleRewardButtonClicked = true
+            }
+        }
+
+// Обработка нажатия на кнопку "Home"
+        homeButton.setOnClickListener {
+            // Закрываем диалоговое окно
+            dismiss()
+
+            // Перенаправляем на MainActivity
+            val intent = Intent(activity, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
+
+        return view
+    }
+
+    private fun updateUI(congratulationsText: String, coinsEarned: Int) {
+        // Обновление текста поздравления
+        val congratulationsTextView: TextView = view?.findViewById(R.id.congratulationsText) ?: return
+        congratulationsTextView.text = congratulationsText
+
+        // Обновление текста с количеством заработанных монет
+        val rewardTextView: TextView = view?.findViewById(R.id.rewardText) ?: return
+        rewardTextView.text = getString(R.string.coins_earned, coinsEarned.toString())
     }
 }

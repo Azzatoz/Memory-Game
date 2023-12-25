@@ -27,7 +27,7 @@
         android:layout_alignParentEnd="true"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:text="@string/currency_d" />
+        android:text="@string/reward_text" />
 
     <!-- Игровая сетка -->
     <androidx.recyclerview.widget.RecyclerView

@@ -3,7 +3,7 @@
     android:layout_height="wrap_content">
 
     <ImageButton
-        android:id="@+id/cardButton"
+        android:id="@+id/imageView"
         android:layout_width="100dp"
         android:layout_height="80dp"
         android:scaleType="fitCenter"

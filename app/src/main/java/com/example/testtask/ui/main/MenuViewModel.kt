@@ -5,16 +5,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class MenuViewModel : ViewModel() {
-
-    private val _coins = MutableLiveData<Int>()
-    val coins: LiveData<Int> get() = _coins
+    private val _coinCount = MutableLiveData<Int>()
+    val coinCount: LiveData<Int>
+        get() = _coinCount
 
     init {
-        _coins.value = 0
+        // Инициализация значения монет (если необходимо)
+        _coinCount.value = 0
     }
 
-    fun addCoins(amount: Int) {
-        val currentCoins = _coins.value ?: 0
-        _coins.value = currentCoins + amount
+    fun setCoinCount(count: Int) {
+        _coinCount.value = count
     }
 }
