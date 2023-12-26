@@ -2,7 +2,6 @@ package com.example.testtask.ui.game
 
 import android.os.Bundle
 import android.os.SystemClock
-import android.util.Log
 import android.widget.Button
 import android.widget.Chronometer
 import android.widget.TextView
@@ -12,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.testtask.R
 import com.example.testtask.ui.support_files.CurrencyManager
 
-class GameActivity : AppCompatActivity(), GameListener {
+class GameActivity : AppCompatActivity(), GameListener, EndGamePopup.EndGameListener {
 
     private lateinit var chronometer: Chronometer
     private lateinit var currencyTextView: TextView
@@ -32,6 +31,7 @@ class GameActivity : AppCompatActivity(), GameListener {
     private var doubleRewardButtonClicked = false
     private var baseReward: Int = 100
     private var calculatedReward: Int = 0
+    private var isCurrencySaved = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,14 +52,11 @@ class GameActivity : AppCompatActivity(), GameListener {
         chronometer.base = SystemClock.elapsedRealtime()
         chronometer.start()
 
-        // Инициализация CurrencyManager
         currencyManager = CurrencyManager(this)
 
-        // Загрузка значения валюты при запуске активности
-        loadCurrency()
+        loadCurrency() // Загрузка значения валюты при запуске активности
 
         autoFinishButton.setOnClickListener {
-            // Вызываем метод, который завершает игру автоматически
             autoFinishGame()
         }
     }
@@ -71,68 +68,55 @@ class GameActivity : AppCompatActivity(), GameListener {
     }
 
     private fun autoFinishGame() {
-        Log.d("com.example.testtask.ui.game.GameActivity", "Auto-finishing the game")
+        stopChronometer()
         val elapsedTime = System.currentTimeMillis() - chronometer.base
         baseReward = calculateReward(elapsedTime)
 
         // Удваиваем награду, если кнопка была нажата
         val doubledReward = if (doubleRewardButtonClicked) 2 * baseReward else baseReward
 
-        // Сохраняем значение валюты при автоматическом завершении игры
         calculatedReward = doubledReward
-
-        // Вызываем метод onGameFinished и передаем ему время и награду
-        onGameFinished(elapsedTime, doubledReward)
+        isCurrencySaved = true // Устанавливаем в true перед вызовом showEndGamePopup
+        showEndGamePopup(calculatedReward)
     }
 
     override fun onGameFinished(elapsedTime: Long, reward: Int) {
+        stopChronometer()
         // Если кнопка удвоения была нажата, удваиваем награду
         val calculatedReward = if (doubleRewardButtonClicked) 2 * reward else reward
-
-        // Сохраняем значение валюты
-        calculatedReward.let { currencyManager.addCurrency(it) }
-
-        // Обновляем UI
-        currencyTextView.text = getString(R.string.coins_earned, currencyManager.getCurrency().toString())
-
-        // Добавим логи
-        Log.d("GameAdapter", "Game finished! Elapsed time: $elapsedTime, Original reward: $baseReward, Doubled reward: $calculatedReward")
-
-        // Останавливаем секундомер
-        stopChronometer()
 
         // Показываем EndGamePopup, передавая количество монет в награде
         showEndGamePopup(calculatedReward)
     }
 
     override fun showEndGamePopup(coinsEarned: Int) {
-        Log.d("com.example.testtask.ui.game.GameActivity", "Showing EndGamePopup with coinsEarned: $coinsEarned")
         // Отображаем EndGamePopup, передавая количество монет в награде
-        val endGamePopup = EndGamePopup.newInstance(coinsEarned)
+        val endGamePopup = EndGamePopup.newInstance(coinsEarned, this)
         endGamePopup.show(supportFragmentManager, EndGamePopup.TAG)
     }
 
-    fun onHomeButtonClicked() {
-        // Если игра завершена и кнопка Home была нажата, передаем основное значение валюты в основной кошелек
-        if (gameAdapter.isGameFinished()) {
-            currencyManager.addCurrency(calculatedReward)
-            currencyTextView.text = getString(R.string.coins_earned, currencyManager.getCurrency().toString())
-        }
+    override fun onGameEnd(coinsEarned: Int) {
+        // Эта функция реализует требование EndGamePopup.EndGameListener
+        // Можешь добавить здесь логику, которую ты хочешь выполнить при завершении игры
+        // Например, обновить UI или сохранить значение валюты
+
+        // Пример: сохранение валюты и обновление UI
+        currencyManager.addCurrency(coinsEarned)
+        currencyTextView.text = getString(R.string.coins_earned, currencyManager.getCurrency().toString())
     }
 
-    private fun stopChronometer() {
-        // Останавливаем секундомер
-        chronometer.stop()
-    }
 
     private fun calculateReward(elapsedTime: Long): Int {
         val maxReward = 100
         val minReward = 10
         val timeThreshold = 20 * 1000
 
-        // Используем min для предотвращения отрицательных значений
-        return (maxReward - ((elapsedTime - timeThreshold).coerceAtLeast(0) / 1000L * 5)).coerceAtLeast(
+        return (maxReward - ((elapsedTime - timeThreshold).coerceAtLeast(100) / 1000L * 5)).coerceAtLeast(
             minReward.toLong()
         ).toInt()
+    }
+
+    private fun stopChronometer() {
+        chronometer.stop()
     }
 }

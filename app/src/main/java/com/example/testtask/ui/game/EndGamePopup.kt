@@ -15,16 +15,22 @@ class EndGamePopup : DialogFragment() {
 
     private var coinsEarned: Int = 0
     private var doubleRewardButtonClicked = false
+    private var endGameListener: EndGameListener? = null
+
+    interface EndGameListener {
+        fun onGameEnd(coinsEarned: Int)
+    }
 
     companion object {
         const val TAG = "EndGamePopup"
         private const val COINS_EARNED_KEY = "coinsEarned"
 
-        fun newInstance(coinsEarned: Int): EndGamePopup {
+        fun newInstance(coinsEarned: Int, endGameListener: EndGameListener): EndGamePopup {
             val fragment = EndGamePopup()
             val args = Bundle()
             args.putInt(COINS_EARNED_KEY, coinsEarned)
             fragment.arguments = args
+            fragment.endGameListener = endGameListener
             return fragment
         }
     }
@@ -39,16 +45,13 @@ class EndGamePopup : DialogFragment() {
         val homeButton: Button = view.findViewById(R.id.homeButton)
 
         // Получение данных из аргументов
-        coinsEarned = requireArguments().getInt(COINS_EARNED_KEY, 0)
-
-        // Обновление UI
-        updateUI("Congratulations! Your reward is doubled!", coinsEarned)
+        coinsEarned = requireArguments().getInt(COINS_EARNED_KEY, 10)
 
         doubleRewardButton.setOnClickListener {
             if (!doubleRewardButtonClicked) {
                 // Удвоение награды и обновление UI
                 coinsEarned *= 2
-                updateUI("Congratulations! Your reward is doubled!", coinsEarned)
+                updateUI("Your reward is doubled!", coinsEarned)
 
                 // Помечаем кнопку как уже нажатую
                 doubleRewardButtonClicked = true
@@ -56,16 +59,15 @@ class EndGamePopup : DialogFragment() {
         }
 
         homeButton.setOnClickListener {
-            // Закрываем диалоговое окно
             dismiss()
 
-            // Перенаправляем на com.example.testtask.ui.main.MainActivity
+            // Перенаправляем в меню (MainActivity)
             val intent = Intent(activity, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
 
-            // Уведомляем GameActivity, что кнопка Home была нажата
-            (activity as? GameActivity)?.onHomeButtonClicked()
+            // Уведомляем GameActivity, что игра завершена
+            endGameListener?.onGameEnd(coinsEarned)
         }
 
         return view
