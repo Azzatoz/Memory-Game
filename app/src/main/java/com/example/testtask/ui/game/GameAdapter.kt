@@ -12,13 +12,14 @@ import com.example.testtask.R
 class GameAdapter(
     private val imageList: Array<Int>,
     private val gameListener: GameListener,
-    private val calculateReward: (Long) -> Int
+    private val calculateReward: () -> Int
 ) : RecyclerView.Adapter<GameAdapter.GameViewHolder>() {
 
     private var lastClickedPosition: Int? = null
     private var isComparing = false
     private var isOpened = BooleanArray(imageList.size)
     private var pairs = mutableSetOf<Int>()
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GameViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -78,12 +79,12 @@ class GameAdapter(
         lastClickedPosition = null
 
         if (isGameFinished()) {
-            val reward = calculateReward(System.currentTimeMillis())
+            val reward = calculateReward()
             gameListener.onGameFinished(System.currentTimeMillis(), reward)
         }
     }
 
-    fun isGameFinished(): Boolean {
+    private fun isGameFinished(): Boolean {
         return pairs.size == imageList.size / 2
     }
 }

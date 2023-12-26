@@ -18,7 +18,7 @@ class EndGamePopup : DialogFragment() {
     private var endGameListener: EndGameListener? = null
 
     interface EndGameListener {
-        fun onGameEnd(coinsEarned: Int)
+        fun leaveout(coinsEarned: Int)
     }
 
     companion object {
@@ -51,7 +51,7 @@ class EndGamePopup : DialogFragment() {
             if (!doubleRewardButtonClicked) {
                 // Удвоение награды и обновление UI
                 coinsEarned *= 2
-                updateUI("Your reward is doubled!", coinsEarned)
+                updateUI(coinsEarned)
 
                 // Помечаем кнопку как уже нажатую
                 doubleRewardButtonClicked = true
@@ -67,19 +67,22 @@ class EndGamePopup : DialogFragment() {
             startActivity(intent)
 
             // Уведомляем GameActivity, что игра завершена
-            endGameListener?.onGameEnd(coinsEarned)
+            endGameListener?.leaveout(coinsEarned)
         }
 
         return view
     }
-
-    private fun updateUI(congratulationsText: String, coinsEarned: Int) {
-        // Обновление текста поздравления
-        val congratulationsTextView: TextView = view?.findViewById(R.id.congratulationsText) ?: return
-        congratulationsTextView.text = congratulationsText
-
-        // Обновление текста с количеством заработанных монет
-        val rewardTextView: TextView = view?.findViewById(R.id.rewardText) ?: return
-        rewardTextView.text = getString(R.string.coins_earned, coinsEarned.toString())
+    override fun onStart() {
+        super.onStart()
+        updateUI(coinsEarned)
     }
+
+    private fun updateUI(coinsEarned: Int) {
+        // Обновление текста с количеством заработанных монет
+        val rewardTextView: TextView? = view?.findViewById(R.id.rewardText)
+        val rewardString = getString(R.string.reward_text, coinsEarned.toString())
+        rewardTextView?.text = rewardString
+
+    }
+
 }
