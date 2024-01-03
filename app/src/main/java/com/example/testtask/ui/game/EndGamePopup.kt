@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.example.testtask.R
@@ -39,10 +40,15 @@ class EndGamePopup : DialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        dialog?.window?.setLayout(
+            resources.getDimensionPixelSize(R.dimen.popup_width),
+            ViewGroup.LayoutParams.WRAP_CONTENT);
+
         val view = inflater.inflate(R.layout.fragment_end_game_popup, container, false)
 
         val doubleRewardButton: Button = view.findViewById(R.id.doubleRewardButton)
-        val homeButton: Button = view.findViewById(R.id.homeButton)
+        val homeButton: ImageButton = view.findViewById(R.id.homeButton)
 
         // Получение данных из аргументов
         coinsEarned = requireArguments().getInt(COINS_EARNED_KEY, 10)

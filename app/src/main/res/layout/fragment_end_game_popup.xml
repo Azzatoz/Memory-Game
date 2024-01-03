@@ -1,5 +1,8 @@
+<!-- res/layout/end_game_popup.xml -->
+
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="300dp"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -43,24 +46,27 @@
         <!-- Double Reward Button -->
         <Button
             android:id="@+id/doubleRewardButton"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/double_reward"
-            android:textSize="16sp"
-            android:background="@color/material_dynamic_neutral40"
             android:layout_marginEnd="8dp"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:layout_weight="1"
+            android:background="@color/material_dynamic_neutral40"
+            android:text="@string/double_reward"
+            android:textColor="#BBDEFB"
+            android:textSize="16sp" />
 
-        <!-- Home Button -->
-        <Button
+        <ImageButton
             android:id="@+id/homeButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/home"
-            android:textSize="16sp"
-            android:background="@color/black"/>
+            android:contentDescription="@string/home_button_description"
+            android:scaleType="fitCenter"
+            android:background="@color/white"
+            android:src="@drawable/home"
+            tools:ignore="SpeakableTextPresentCheck" />
+
     </LinearLayout>
 
 </LinearLayout>
